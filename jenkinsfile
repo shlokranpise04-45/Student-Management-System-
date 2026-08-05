@@ -1,69 +1,63 @@
-pipeline { 
+pipeline {
+    agent any
 
-    agent any 
+    stages {
 
-    stages { 
+        stage('Verify Application Files') {
+            steps {
+                echo 'Verifying project files...'
 
-        stage('Verify Application Files') { 
+                bat '''
+                if exist index.html (
+                    echo index.html Found
+                ) else (
+                    exit /b 1
+                )
 
-            steps { 
+                if exist style.css (
+                    echo style.css Found
+                ) else (
+                    exit /b 1
+                )
 
-                echo 'Verifying project files...' 
+                if exist script.js (
+                    echo script.js Found
+                ) else (
+                    exit /b 1
+                )
+                '''
+            }
+        }
 
- 
+        stage('Create Build Artifact') {
+            steps {
+                echo 'Creating ZIP file...'
 
-                bat 'if exist index.html (echo index.html Found) else (exit 1)' 
+                bat '''
+                if exist StudentManagementSystem.zip del StudentManagementSystem.zip
+                powershell -Command "Compress-Archive -Path index.html,style.css,script.js,Jenkinsfile -DestinationPath StudentManagementSystem.zip -Force"
+                '''
+            }
+        }
 
-                bat 'if exist style.css (echo style.css Found) else (exit 1)' 
+        stage('Archive Build') {
+            steps {
+                archiveArtifacts artifacts: 'StudentManagementSystem.zip', fingerprint: true
+            }
+        }
+    }
 
-                bat 'if exist script.js (echo script.js Found) else (exit 1)' 
+    post {
+        success {
+            echo 'Application Build Successful.'
+        }
 
-            } 
+        failure {
+            echo 'Application Build Failed.'
+        }
 
-        } 
-
-        stage('Create Build Artifact') { 
-
-            steps { 
-
-                echo 'Creating ZIP file...' 
-
-     bat 'powershell Compress-Archive -Path * -DestinationPath  
-
-StudentManagementSystem.zip -Force' 
-
-            } 
-
-        } 
-
-        stage('Archive Build') { 
-
-            steps { 
-
-                archiveArtifacts artifacts: 'StudentManagementSystem.zip', fingerprint: true 
-
-            } 
-
-        } 
-
-    } 
-
- 
-
-    post { 
-
-        success { 
-
-            echo 'Application Build Successful.' 
-
-        } 
-
-        failure { 
-
-            echo 'Application Build Failed.' 
-
-        } 
-
-    } 
-
-} 
+        always {
+            echo 'Pipeline execution completed.'
+        }
+    }
+}
