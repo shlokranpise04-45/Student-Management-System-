@@ -1,63 +1,77 @@
-pipeline {
-    agent any
+pipeline { 
 
-    stages {
+    agent any 
 
-        stage('Verify Application Files') {
+    stages { 
+
+        stage('Verify Application Files') { 
+
+            steps { 
+
+                echo 'Verifying project files...' 
+
+ 
+
+                bat 'if exist index.html (echo index.html Found) else (exit 1)' 
+
+                bat 'if exist style.css (echo style.css Found) else (exit 1)' 
+
+                bat 'if exist script.js (echo script.js Found) else (exit 1)' 
+
+            } 
+
+        } 
+
+        stage('Checkout Source Code') {
             steps {
-                echo 'Verifying project files...'
-
-                bat '''
-                if exist index.html (
-                    echo index.html Found
-                ) else (
-                    exit /b 1
-                )
-
-                if exist style.css (
-                    echo style.css Found
-                ) else (
-                    exit /b 1
-                )
-
-                if exist script.js (
-                    echo script.js Found
-                ) else (
-                    exit /b 1
-                )
-                '''
+                echo 'Downloading latest application code from GitHub...'
+                git branch: 'main',
+                url: 'https://github.com/shlokranpise04-45/Student-Management-System-.git'
             }
         }
 
-        stage('Create Build Artifact') {
-            steps {
-                echo 'Creating ZIP file...'
+        stage('Create Build Artifact') { 
 
-                bat '''
-                if exist StudentManagementSystem.zip del StudentManagementSystem.zip
-                powershell -Command "Compress-Archive -Path index.html,style.css,script.js,Jenkinsfile -DestinationPath StudentManagementSystem.zip -Force"
-                '''
-            }
-        }
+            steps { 
 
-        stage('Archive Build') {
-            steps {
-                archiveArtifacts artifacts: 'StudentManagementSystem.zip', fingerprint: true
-            }
-        }
-    }
+                echo 'Creating ZIP file...' 
 
-    post {
-        success {
-            echo 'Application Build Successful.'
-        }
+     bat 'powershell Compress-Archive -Path * -DestinationPath  
 
-        failure {
-            echo 'Application Build Failed.'
-        }
+StudentManagementSystem.zip -Force' 
 
-        always {
-            echo 'Pipeline execution completed.'
-        }
-    }
+            } 
+
+        } 
+
+        stage('Archive Build') { 
+
+            steps { 
+
+                archiveArtifacts artifacts: 'StudentManagementSystem.zip', fingerprint: true 
+
+            } 
+
+        } 
+
+    } 
+
+ 
+
+    post { 
+
+        success { 
+
+            echo 'Application Build Successful.' 
+
+        } 
+
+        failure { 
+
+            echo 'Application Build Failed.' 
+
+        } 
+
+    } 
+
 }
